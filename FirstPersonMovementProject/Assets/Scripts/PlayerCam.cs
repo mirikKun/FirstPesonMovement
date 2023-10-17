@@ -7,24 +7,28 @@ public class PlayerCam : MonoBehaviour
 {
     public float sensX;
     public float sensY;
+    public PlayerInputPC playerInput;
 
     public Transform orientation;
     public Transform camHolder;
 
-    float xRotation;
-    float yRotation;
+    private float xRotation;
+    private float yRotation;
+    private Camera camera;
 
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        camera = GetComponent<Camera>();
+
     }
 
     private void Update()
     {
         // get mouse input
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
+        float mouseX = playerInput.XMouseInput * Time.deltaTime * sensX;
+        float mouseY = playerInput.YMouseInput * Time.deltaTime * sensY;
 
         yRotation += mouseX;
 
@@ -38,7 +42,7 @@ public class PlayerCam : MonoBehaviour
 
     public void DoFov(float endValue)
     {
-        GetComponent<Camera>().DOFieldOfView(endValue, 0.25f);
+        camera.DOFieldOfView(endValue, 0.25f);
     }
 
     public void DoTilt(float zTilt)
