@@ -46,6 +46,6 @@ public class PlayerInputPC : MonoBehaviour, IInput
 
     private bool GetSprintInput()
     {
-        return Input.GetKeyDown(KeyCode.LeftShift);
+        return Input.GetKey(KeyCode.LeftShift);
     }
 }
