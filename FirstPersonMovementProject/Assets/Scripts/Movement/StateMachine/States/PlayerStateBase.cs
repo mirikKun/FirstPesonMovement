@@ -6,13 +6,13 @@ namespace Movement.StateMachine.States
     {
         protected IInput _input;
         protected PlayerMover _mover;
-        protected PlayerStateMaсhine _stateMasine;
+        protected PlayerStateMaсhine _stateMachine;
 
         public abstract bool ConditionToEnter();
 
-        public void Construct(PlayerStateMaсhine stateMaсhine, PlayerMover mover, IInput input)
+        public void Construct(PlayerStateMaсhine stateMachine, PlayerMover mover, IInput input)
         {
-            _stateMasine = stateMaсhine;
+            _stateMachine = stateMachine;
             _mover = mover;
             _input = input;
         }

@@ -1,43 +1,43 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMover : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI tex111;
-    [SerializeField] private TextMeshProUGUI tex222;
     [SerializeField] private float _gravity = -30f;
     [SerializeField] private float _onGroundGravity = 2;
-    [SerializeField] private float groundDrag = 4;
+    [SerializeField] private float _groundDrag = 4;
 
     private float _curSpeed;
     private float _desiredSpeed;
 
 
-    public bool Grounded { get; set; }
+    public bool Grounded { get; private set; }
 
 
     public Rigidbody Rb { get; private set; }
 
-    public Vector3 MoveDirection { get; private set; }
+    public Vector3 MoveDirection {  get; private set; }
     private Vector3 _gravityDirection = new(0, -1, 0);
     private float _curGravity;
 
     private float _transitionTime;
     private float _curTransitionTime;
     [SerializeField] private LayerMask whatIsGround;
-    [SerializeField] private float playerHeight = 2;
-    private float _speedAccelarator=10;
+    [SerializeField] private float _playerHeight = 2;
+    private float _speedAccelarator = 10;
+    private RaycastHit _slopeHit;
+    private float _maxSlopeAngle = 30;
+    public bool DefaultMovementVector { get; set; } = true;
+    public Vector3 CustomMoveDirection { get; set; }
+    public bool CantBeGrounded { get; set; }
+
 
     private void Awake()
     {
         ResetGravity();
         Rb = GetComponent<Rigidbody>();
-        Rb.drag = groundDrag;
+        Rb.drag = _groundDrag;
     }
 
     private void Update()
@@ -48,17 +48,9 @@ public class PlayerMover : MonoBehaviour
         SpeedControl();
     }
 
-    private void GroundedCheck()
-    {
-        bool touchGround = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
-
-        Grounded = touchGround;
-    }
-
     private void FixedUpdate()
     {
-        MoveForce();
-
+        MovingForce();
         GravityForce();
     }
 
@@ -76,44 +68,90 @@ public class PlayerMover : MonoBehaviour
         _curSpeed = speed;
     }
 
-    public void ChangeDirection(Vector3 direction)
+    public void StopMoving()
     {
-        MoveDirection = direction;
+        _desiredSpeed = 0;
+        _curSpeed = 0;
+        Rb.velocity = Vector3.zero;
     }
+    public void StopVerticalMovement()
+    {
+        Vector3 velocity = Rb.velocity;
+        Rb.velocity = new Vector3(velocity.x,0,velocity.z);
+    }
+    public void ChangeDirection(Vector3 direction) => MoveDirection = direction;
 
 
-    public void ChangeGravity(float gravity)
+    public void SetGravity(float gravity) => _curGravity = gravity;
+
+    public void ResetGravity() => _curGravity = _gravity;
+
+    public bool NotMovingUp() => Rb.velocity.y - GetCurrentMovementVector().y < 1;
+    public float GetMoveScrMagnitude() => MoveDirection.sqrMagnitude;
+
+
+    public bool NotMovingVertically()
     {
-        _curGravity = _gravity;
+        float verticalSpeed = Rb.velocity.y - GetCurrentMovementVector().y;
+        return verticalSpeed is > -1 and < 1;
     }
 
-    private void MoveForce()
+    public bool OnSlope(Vector3 upDirection)
     {
-        Rb.AddForce(MoveDirection.normalized * _curSpeed*_speedAccelarator, ForceMode.Force);
+        if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, _playerHeight * 0.5f + 0.3f))
+        {
+            float angle = Vector3.Angle(upDirection, _slopeHit.normal);
+            return angle < _maxSlopeAngle;
+        }
+
+        return false;
     }
+
+    private void MovingForce()
+    {
+        if (CanMove())
+        {
+            Rb.AddForce(GetCurrentMovementVector() * _speedAccelarator, ForceMode.Force);
+        }
+    }
+
+    private bool CanMove()
+    {
+        return OnSlope(Vector3.up)||!Grounded;
+    }
+
+    private Vector3 GetCurrentMovementVector()
+    {
+        Vector3 direction;
+        if (DefaultMovementVector)
+        {
+            direction = MoveDirection;
+        }
+        else
+        {
+            direction = CustomMoveDirection;
+        }
+        return GetSlopeMoveDirection(direction, _slopeHit.normal) * _curSpeed;
+    }
+
 
     private void SpeedControl()
     {
-        Vector3 rbXYVelocity = new Vector3(Rb.velocity.x, 0f, Rb.velocity.z);
+        Vector3 velocity = Rb.velocity;
+        Vector3 rbXYVelocity = new Vector3(velocity.x, 0f, velocity.z);
         if (rbXYVelocity.magnitude > _curSpeed)
         {
             Vector3 limitedVel = rbXYVelocity.normalized * _curSpeed;
             Rb.velocity = new Vector3(limitedVel.x, Rb.velocity.y, limitedVel.z);
         }
-
-        tex111.text = rbXYVelocity.magnitude.ToString();
-        tex222.text = Rb.velocity.magnitude.ToString();
     }
 
-    private void GravityForce()
+    private void GroundedCheck()
     {
-        Rb.AddForce(_curGravity * _gravityDirection, ForceMode.Force);
-    }
-
-
-    public void ResetGravity()
-    {
-        _curGravity = _gravity;
+        bool touchGround = Physics.SphereCast(transform.position, 0.5f, Vector3.down, out RaycastHit ray,
+            _playerHeight * 0.5f + 0.2f, whatIsGround);
+        bool notMovingUp = NotMovingUp();
+        Grounded = touchGround && notMovingUp && !CantBeGrounded;
     }
 
     private void SpeedChanging()
@@ -125,13 +163,16 @@ public class PlayerMover : MonoBehaviour
         }
     }
 
-    private void SetGroundDrag()
+
+    private Vector3 GetSlopeMoveDirection(Vector3 moveDirection, Vector3 slopeNormal)
     {
-        Rb.drag = Grounded ? groundDrag : 0;
+        return Vector3.ProjectOnPlane(moveDirection, slopeNormal).normalized;
     }
 
-    private void SmoothSpeedChanging()
-    {
+    private void GravityForce() => Rb.AddForce(_curGravity * _gravityDirection, ForceMode.Force);
+
+    private void SetGroundDrag() => Rb.drag = Grounded ? _groundDrag : 0;
+
+    private void SmoothSpeedChanging() =>
         _curSpeed = Mathf.Lerp(_curSpeed, _desiredSpeed, _curTransitionTime / _transitionTime);
-    }
 }

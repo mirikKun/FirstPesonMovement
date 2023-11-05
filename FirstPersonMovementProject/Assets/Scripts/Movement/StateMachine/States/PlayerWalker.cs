@@ -10,7 +10,7 @@ namespace Movement.StateMachine.States
 
         public override bool ConditionToEnter()
         {
-            return !_input.Sprint && _mover.Grounded && _mover.MoveDirection.sqrMagnitude > MinMagnitude;
+            return !_input.Sprint && _mover.Grounded && _mover.GetMoveScrMagnitude() > MinMagnitude;
         }
 
         public override void Enter()

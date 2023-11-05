@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 
 namespace Movement.StateMachine
 {
@@ -20,12 +18,21 @@ namespace Movement.StateMachine
                 }
             }
         }
+
+        public bool CurStateIs<T>() where T:IPlayerState
+        {
+            return typeof(T) == _activePlayerState.GetType();
+        }
         public PlayerStateMaсhine(IPlayerState[] states)
         {
             _states = states;
             _activePlayerState = _states[0];
         }
-    
+
+        public string GetStateName()
+        {
+            return _activePlayerState.GetType().ToString();
+        }
         public void Enter(IPlayerState state) 
         {
             IPlayerState playerState = ChangeState(state);

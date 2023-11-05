@@ -9,6 +9,8 @@ namespace Movement
     {
         [SerializeField] private PlayerMover mover;
         [SerializeField] private PlayerInputPC input;
+        [SerializeField] private TextMeshProUGUI tex111;
+
         private PlayerStateMaсhine _stateMaсhine;
 
 
@@ -25,6 +27,8 @@ namespace Movement
 
         private void Update()
         {
+            tex111.text = _stateMaсhine.GetStateName();
+
             _stateMaсhine.CheckStatesTransitions();
         }
     }
