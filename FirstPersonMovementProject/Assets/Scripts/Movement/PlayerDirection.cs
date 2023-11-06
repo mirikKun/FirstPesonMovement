@@ -14,8 +14,9 @@ namespace Movement
         private void Update()
         {
             GetMovementInput();
-           
-            _playerMover.ChangeDirection(MoveDirection);
+
+                _playerMover.ChangeDirection(MoveDirection);
+         
         }
 
         private void GetMovementInput()

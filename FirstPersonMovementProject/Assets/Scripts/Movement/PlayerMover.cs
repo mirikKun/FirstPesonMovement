@@ -7,30 +7,27 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] private float _gravity = -30f;
     [SerializeField] private float _onGroundGravity = 2;
     [SerializeField] private float _groundDrag = 4;
+    [SerializeField] private LayerMask whatIsGround;
+    [SerializeField] private float _playerHeight = 2;
 
     private float _curSpeed;
     private float _desiredSpeed;
 
 
-    public bool Grounded { get; private set; }
-
-
-    public Rigidbody Rb { get; private set; }
-
-    public Vector3 MoveDirection {  get; private set; }
     private Vector3 _gravityDirection = new(0, -1, 0);
     private float _curGravity;
 
     private float _transitionTime;
     private float _curTransitionTime;
-    [SerializeField] private LayerMask whatIsGround;
-    [SerializeField] private float _playerHeight = 2;
     private float _speedAccelarator = 10;
     private RaycastHit _slopeHit;
     private float _maxSlopeAngle = 30;
+    public Vector3 MoveDirection {  get; private set; }
     public bool DefaultMovementVector { get; set; } = true;
     public Vector3 CustomMoveDirection { get; set; }
     public bool CantBeGrounded { get; set; }
+    public Rigidbody Rb { get; private set; }
+    public bool Grounded { get; private set; }
 
 
     private void Awake()
@@ -80,7 +77,6 @@ public class PlayerMover : MonoBehaviour
         Rb.velocity = new Vector3(velocity.x,0,velocity.z);
     }
     public void ChangeDirection(Vector3 direction) => MoveDirection = direction;
-
 
     public void SetGravity(float gravity) => _curGravity = gravity;
 

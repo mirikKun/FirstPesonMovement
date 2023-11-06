@@ -12,6 +12,13 @@ public class PlayerInputPC : MonoBehaviour, IInput
 
     public bool Jump => GetJumpInput();
     public bool Slide => GetSlideInput();
+    public bool Dash => GetDashInput();
+
+    private bool GetDashInput()
+    {
+        return Input.GetKeyDown(KeyCode.C);
+    }
+
     public bool Sprint => GetSprintInput();
 
     private float GetXInput()

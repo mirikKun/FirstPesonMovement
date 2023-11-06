@@ -3,13 +3,12 @@ using UnityEngine;
 
 namespace Movement.StateMachine.States
 {
-    public class WallRunState:PlayerStateBase
+    public class WallRunState:PlayerRechargeableStateBase
     {
         [SerializeField] private Transform _orientation;
         [SerializeField] private float _stickToWallForce = 5;
         [SerializeField] private float _wallRunSpeed=7;
-        [SerializeField] private float _wallRunCooldown=0.2f;
-        private float _wallRunTime;
+
 
         private bool _wallLeft;
         private bool _wallRight;
@@ -18,12 +17,11 @@ namespace Movement.StateMachine.States
         [SerializeField]private float _wallCheckDistance;
         [SerializeField]private LayerMask _whatIsWall;
         private bool _active;
-        private bool _readyToWallRun;
 
 
-        private void Update()
+        protected override void StateUpdate()
         {
-            WallRunCooldown();
+            base.StateUpdate();
             if (!_active)
                 return;
             WallRunning();
@@ -45,29 +43,16 @@ namespace Movement.StateMachine.States
 
         public override void Exit()
         {
+            StartCooldown();
+
             _mover.ResetGravity();
             _active = false;
             
             _mover.DefaultMovementVector = true;
             _mover.CustomMoveDirection = _wallRight ? _rightWallHit.normal : _leftWallHit.normal;
-            
-            _readyToWallRun = false;
-            _wallRunTime = 0;
         }
 
-        private void WallRunCooldown()
-        {
-            if (!_readyToWallRun)
-            {
-                _wallRunTime += Time.deltaTime;
-                if (_wallRunTime > _wallRunCooldown)
-                {
-                    _readyToWallRun = true;
-                    _mover.CantBeGrounded = false;
 
-                }
-            }
-        }
 
         private void WallRunning()
         {

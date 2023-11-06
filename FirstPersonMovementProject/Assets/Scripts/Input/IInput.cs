@@ -8,6 +8,7 @@ public interface IInput
     public float YInput { get; }
     public bool Jump { get; }
     public bool Slide { get; }
+    public bool Dash { get; }
     public bool Sprint { get; }
     float XMouseInput { get; }
     float YMouseInput { get; }
