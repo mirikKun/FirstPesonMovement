@@ -40,17 +40,19 @@ namespace Movement.StateMachine.States
             StartCooldown();
             _active = true;
             _dashTime = _duration;
-            Dash();
+            StartDash();
 
         }
 
         public override void Exit()
         {
-            
             _active = false;
             _mover.ResetGravity();
             _mover.CantBeGrounded=false;
             _mover.ChangeSpeed(_afterDashSpeed,0);
+            _mover.DefaultMovementVector = true;
+            Debug.Log("222"+_mover.DefaultMovementVector);
+
         }
 
         private Vector3 GetDashDirection()
@@ -65,16 +67,18 @@ namespace Movement.StateMachine.States
             }
         }
 
-        private void Dash()
+        private void StartDash()
         {
             _mover.CantBeGrounded=true;
             _mover.StopVerticalMovement();
             _mover.SetGravity(0);
             _mover.ChangeSpeed(_dashForce,0);
+            
             Vector3 direction = GetDashDirection();
-
             Vector3 forceToApply = direction * _dashForce ;
-
+            _mover.CustomMoveDirection = direction;
+            _mover.DefaultMovementVector = false;
+            Debug.Log("111"+_mover.DefaultMovementVector);
             _mover.AddImpuls(forceToApply);
         }
     }

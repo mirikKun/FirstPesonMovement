@@ -1,5 +1,7 @@
 
 
+using UnityEngine;
+
 namespace Movement.StateMachine
 {
     public class PlayerStateMaсhine 
@@ -15,6 +17,7 @@ namespace Movement.StateMachine
                 if (_activePlayerState != state && state.ConditionToEnter())
                 {
                     Enter(state);
+                    Debug.Log(GetStateName());
                 }
             }
         }
